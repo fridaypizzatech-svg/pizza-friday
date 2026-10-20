@@ -168,7 +168,8 @@
   </section>
 
   <section class="tab" id="tab-ads">
-    <div class="grid" id="adsum" style="margin-top:2px"></div>
+    <div class="card" id="adshead" style="margin-top:0"></div>
+    <div class="grid" id="adsum" style="margin-top:10px"></div>
     <div id="adlist"></div>
     <div class="card">
       <h3>Ориентиры (локальная еда в регионе)</h3>
@@ -287,6 +288,13 @@ const ST={plan:['st-plan','в плане'],on:['st-on','активна'],mod:['s
 function fmtN(n){return (n||n===0)?Math.round(n).toLocaleString('ru-RU'):'—';}
 function renderAds(c){
   const sum=$('#adsum'), list=$('#adlist');
+  $('#adshead').innerHTML=
+   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+   '<span class="badge code">РЕКЛАМА</span>'+
+   '<span style="font-size:13px;font-weight:700">'+c.name+'</span>'+
+   '<a class="reply" style="margin:0 0 0 auto" href="https://ads.vk.ru" target="_blank" rel="noopener">Открыть VK Рекламу</a>'+
+   '</div>'+
+   '<div class="goal" style="margin-top:6px">У каждого города свои кампании: бюджет, аудитории и статусы не смешиваются. Переключай город наверху — карточки ниже покажут его кампании.</div>';
   const camps=(c.ads&&c.ads.campaigns)||[];
   if(!camps.length){
     sum.innerHTML=kpi('Расход','—','<div class="delta">кампаний нет</div>')+kpi('Клики','—','<div class="delta">кампаний нет</div>');
@@ -298,7 +306,7 @@ function renderAds(c){
   const spend=total('spend'), views=total('views'), clicks=total('clicks');
   const cpc=clicks?spend/clicks:null, ctr=views?clicks/views*100:null;
   sum.innerHTML=
-   kpi('Расход (активные)',spend?fmtN(spend)+' ₽':(act.length?'0 ₽':'—'),'<div class="delta">'+(act.length?act.length+' активных':'нет активных')+'</div>')+
+   kpi('Расход · '+c.name,spend?fmtN(spend)+' ₽':(act.length?'0 ₽':'—'),'<div class="delta">'+(act.length?act.length+' активных':'нет активных')+'</div>')+
    kpi('Клики',clicks?fmtN(clicks):'—','<div class="delta">CTR '+(ctr!=null?ctr.toFixed(2)+'%':'—')+'</div>')+
    kpi('Показы',views?fmtN(views):'—','<div class="delta">за всё время</div>')+
    kpi('Цена клика',cpc!=null?cpc.toFixed(1)+' ₽':'—','<div class="delta">ориентир 8–20 ₽</div>');
