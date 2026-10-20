@@ -231,21 +231,24 @@ function renderCity(){
   $('#dot').textContent=need.length; $('#dot').style.display=need.length?'':'none';
 
   const cnt=+(c.rating[1].split('·')[1]||'').trim();
+  const weekCount=reviews.filter(r=>{if(!r.date)return false;const t=Date.parse(r.date.replace(' ','T'));return !isNaN(t)&&(Date.now()-t)<=7*864e5}).length;
   const subsKpi=c.week
     ? kpi('Подписчики ВК',c.subs||'—','<div class="delta up">'+c.week.newSubs+' за неделю</div>')
-    : kpi('Подписчики ВК','—','<div class="delta">ВК-ключ подключается</div>');
+    : (c.subs
+        ? kpi('Подписчики ВК',Number(c.subs).toLocaleString('ru-RU'),'<div class="delta up">уже в дашборде</div>')
+        : kpi('Подписчики ВК','—','<div class="delta">ВК-ключ подключается</div>'));
   const reachKpi=c.week
     ? kpi('Охват ВК',c.week.reachShort||'—','<div class="delta up">'+c.week.reach[1]+' к прошлой</div>')
     : kpi('Охват ВК','—','<div class="delta">ВК-ключ подключается</div>');
   $('#kpis').innerHTML=
-   kpi('Отзывы за неделю',reviews.length, need.length?'<div class="delta warn">'+need.length+' требуют ответа</div>':'<div class="delta up">всё спокойно</div>')+
+   kpi('Отзывы за неделю',weekCount, need.length?'<div class="delta warn">'+need.length+' требуют ответа</div>':'<div class="delta up">всё спокойно</div>')+
    kpi('Рейтинг',c.rating[0],'<div class="delta up">'+cnt+' '+plural(cnt,'оценка','оценки','оценок')+'</div>')+
    subsKpi+reachKpi;
 
   const box=$('#alertbox');
   if(need.length){
     box.innerHTML='<div class="card alert-card"><div class="big">🔴 '+need.length+' '+plural(need.length,'отзыв','отзыва','отзывов')+' '+(need.length===1?'ждёт':'ждут')+' ответа</div><p>'+
-      need.map(r=>r.n+' ('+r.s+'★, '+SRC[r.src]+')').join('<br>')+'</p><button class="btn btn-accent" data-goto="reviews" data-filter="need">Ответить</button></div>';
+      need.map(r=>r.n+' ('+((r.s!=null?r.s+'★, ':'')+SRC[r.src])+')').join('<br>')+'</p><button class="btn btn-accent" data-goto="reviews" data-filter="need">Ответить</button></div>';
   }else{
     box.innerHTML='<div class="card alert-card ok"><div class="big">✓ '+(reviews.length?'Со всеми отзывами ответили':'Новых отзывов нет')+'</div><p>'+(reviews.length?'Новых за неделю: '+reviews.length+'. Так держать!':'Как только появятся новые — пришлю сюда, в бот.')+'</p></div>';
   }
