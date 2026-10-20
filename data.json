@@ -1,0 +1,49 @@
+{
+  "generated": "2026-10-20 20:10",
+  "cities": {
+    "ryazan": {
+      "name": "Рязань",
+      "addr": "Зубкова 21",
+      "rating": ["5.0★", "Яндекс · 926"],
+      "sources": {
+        "yandex": "https://yandex.ru/profile/108725719573",
+        "gis": "https://2gis.ru/ryazan/firm/70000001045786601",
+        "vk": "https://vk.com/pizzafriday62"
+      },
+      "reviews": []
+    },
+    "tambov": {
+      "name": "Тамбов",
+      "addr": "Магистральная, 4А",
+      "rating": ["4.9★", "Яндекс · 1772"],
+      "sources": {
+        "yandex": "https://yandex.ru/profile/233214754288",
+        "gis": "https://2gis.ru/tambov/firm/70000001039485425",
+        "vk": "https://vk.com/68pizza"
+      },
+      "reviews": []
+    },
+    "penza": {
+      "name": "Пенза",
+      "addr": "Рахманинова, 2",
+      "rating": ["5.0★", "Яндекс · 572"],
+      "sources": {
+        "yandex": "https://yandex.ru/profile/157002340215",
+        "gis": "https://2gis.ru/penza/firm/70000001065572448",
+        "vk": "https://vk.ru/58pizza"
+      },
+      "reviews": []
+    },
+    "saransk": {
+      "name": "Саранск",
+      "addr": "Васенко, 15",
+      "rating": ["5.0★", "Яндекс · 389"],
+      "sources": {
+        "yandex": "https://yandex.ru/profile/128625449818",
+        "gis": "https://2gis.ru/saransk/firm/70000001079188836",
+        "vk": "https://vk.ru/pizzafriday13"
+      },
+      "reviews": []
+    }
+  }
+}
