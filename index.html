@@ -200,7 +200,7 @@ function bigRender(){
 
 // ================= РЕНДЕР ГОРОДА =================
 function renderCity(){
-  const c=CITIES[CITY], reviews=c.reviews||[], need=reviews.filter(r=>r.s!=null&&r.s<=3);
+  const c=CITIES[CITY], reviews=c.reviews||[], need=reviews.filter(r=>(r.s!=null&&r.s<=3)||r.hot);
   $('#sub').textContent=[c.name,c.addr,'обновлено '+new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+', '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})].filter(Boolean).join(' · ');
   $('#rateVal').textContent=c.rating[0]; $('#rateSrc').textContent=c.rating[1];
   $('#dot').textContent=need.length; $('#dot').style.display=need.length?'':'none';
