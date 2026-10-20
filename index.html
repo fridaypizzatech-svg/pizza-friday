@@ -72,6 +72,19 @@
   .badge.ya{background:rgba(255,209,0,.15);color:#FFD100}
   .badge.gis{background:rgba(77,217,123,.15);color:#4CD97B}
   .badge.hot{background:rgba(255,92,92,.18);color:var(--red)}
+  .badge.st-plan{background:var(--card2);color:var(--muted)}
+  .badge.st-on{background:rgba(77,217,123,.15);color:var(--green)}
+  .badge.st-mod{background:rgba(255,209,0,.15);color:#FFD100}
+  .badge.st-off{background:rgba(255,92,92,.18);color:var(--red)}
+  .badge.code{background:rgba(255,138,42,.15);color:var(--accent);margin-left:0;margin-right:6px}
+  .camp{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-top:10px}
+  .camp .head{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .camp .who{font-size:13px;font-weight:600}
+  .camp .goal{font-size:11px;color:var(--muted);margin-top:3px}
+  .camp .mrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .camp .m{background:var(--card2);border-radius:10px;padding:8px 10px;flex:1;min-width:70px;text-align:center}
+  .camp .m .l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .camp .m .v{font-size:14px;font-weight:700;margin-top:3px}
   .review .txt{font-size:13px;line-height:1.5;margin-top:9px;color:#E6E2DB}
   .draft{margin-top:10px;background:var(--card2);border:1px dashed #3A3646;border-radius:12px;padding:10px 12px}
   .draft .lbl{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--accent);text-transform:uppercase}
@@ -117,7 +130,7 @@
     <button data-tab="overview" class="active">Обзор</button>
     <button data-tab="reviews">Отзывы <span class="dot" id="dot" style="display:none"></span></button>
     <button data-tab="vk">ВК</button>
-    <button disabled>Реклама</button>
+    <button data-tab="ads">Реклама</button>
   </nav>
 
   <section class="tab active" id="tab-overview">
@@ -150,6 +163,15 @@
     <div class="card bars">
       <h3>Аудитория</h3>
       <div id="aud"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-ads">
+    <div class="grid" id="adsum" style="margin-top:2px"></div>
+    <div id="adlist"></div>
+    <div class="card">
+      <h3>Ориентиры (локальная еда в регионе)</h3>
+      <p class="hint">CPM 90–160 ₽ · клик 8–20 ₽ · подписчик 8–50 ₽. CTR ниже 0,5% — менять креатив. Цифры сильно хуже ориентиров — пересматриваем связку «аудитория × креатив × оффер». Полный план и правила — в базе знаний по VK Рекламе.</p>
     </div>
   </section>
 
@@ -230,7 +252,7 @@ function renderCity(){
   if(c.visitors) chart(spark,c.visitors.slice(-7),WD);
   else spark.innerHTML='<div class="empty">График появится после подключения группы ВК</div>';
   bigRender();
-  renderWeek(c); renderAud(c); FILTER='all'; renderChips(c,reviews,need); renderReviews(reviews,need);
+  renderWeek(c); renderAud(c); renderAds(c); FILTER='all'; renderChips(c,reviews,need); renderReviews(reviews,need);
 }
 function renderWeek(c){
   if(!c.week){ $('#weekstats').innerHTML='<div class="empty">Итоги появятся после подключения ключа ВК</div>'; return; }
@@ -243,6 +265,40 @@ function renderWeek(c){
 function renderAud(c){
   if(!c.aud){ $('#aud').innerHTML='<div class="empty">Аудитория появится после подключения ключа ВК</div>'; return; }
   $('#aud').innerHTML=c.aud.map(a=>'<div class="row"><div class="t"><span>'+a[0]+'</span><span>'+a[1]+'%</span></div><div class="bar"><i style="width:'+a[1]+'%"></i></div></div>').join('');
+}
+
+// ================= РЕКЛАМА =================
+const ST={plan:['st-plan','в плане'],on:['st-on','активна'],mod:['st-mod','модерация'],off:['st-off','остановлена']};
+function fmtN(n){return (n||n===0)?Math.round(n).toLocaleString('ru-RU'):'—';}
+function renderAds(c){
+  const sum=$('#adsum'), list=$('#adlist');
+  const camps=(c.ads&&c.ads.campaigns)||[];
+  if(!camps.length){
+    sum.innerHTML=kpi('Расход','—','<div class="delta">кампаний нет</div>')+kpi('Клики','—','<div class="delta">кампаний нет</div>');
+    list.innerHTML='<div class="card"><div class="big" style="font-size:14px;font-weight:600">Рекламных кампаний пока нет</div><p class="hint" style="margin-top:6px">Ниже — плановая структура запуска К1–К4. Когда запустишь кампании в VK Рекламе и подключим ключ API, здесь появится живая статистика по каждому городу.</p></div>';
+    return;
+  }
+  const act=camps.filter(x=>x.status==='on');
+  const total=f=>act.reduce((s,x)=>s+(x[f]||0),0);
+  const spend=total('spend'), views=total('views'), clicks=total('clicks');
+  const cpc=clicks?spend/clicks:null, ctr=views?clicks/views*100:null;
+  sum.innerHTML=
+   kpi('Расход (активные)',spend?fmtN(spend)+' ₽':(act.length?'0 ₽':'—'),'<div class="delta">'+(act.length?act.length+' активных':'нет активных')+'</div>')+
+   kpi('Клики',clicks?fmtN(clicks):'—','<div class="delta">CTR '+(ctr!=null?ctr.toFixed(2)+'%':'—')+'</div>')+
+   kpi('Показы',views?fmtN(views):'—','<div class="delta">за всё время</div>')+
+   kpi('Цена клика',cpc!=null?cpc.toFixed(1)+' ₽':'—','<div class="delta">ориентир 8–20 ₽</div>');
+  list.innerHTML=camps.map(x=>{
+    const st=ST[x.status]||ST.plan, has=x.spend!=null;
+    const m=has
+      ?'<div class="mrow"><div class="m"><div class="l">Расход</div><div class="v">'+fmtN(x.spend)+' ₽</div></div>'+
+       '<div class="m"><div class="l">Показы</div><div class="v">'+fmtN(x.views)+'</div></div>'+
+       '<div class="m"><div class="l">Клики</div><div class="v">'+fmtN(x.clicks)+'</div></div>'+
+       '<div class="m"><div class="l">CPC</div><div class="v">'+(x.clicks?(x.spend/x.clicks).toFixed(1)+' ₽':'—')+'</div></div></div>'
+      :'<p class="hint" style="margin-top:8px">Из плана запуска. Запустишь — карточка оживёт и начнёт показывать статистику.</p>';
+    return '<div class="camp"><div class="head"><span class="badge code">'+x.code+'</span>'+
+      '<span class="who">'+x.name+'</span><span class="badge '+st[0]+'">'+st[1]+'</span></div>'+
+      '<div class="goal">'+x.goal+'</div>'+m+'</div>';
+  }).join('');
 }
 
 // ================= ОТЗЫВЫ =================
