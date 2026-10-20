@@ -148,7 +148,8 @@
   </section>
 
   <section class="tab" id="tab-vk">
-    <div class="card" style="margin-top:0">
+    <div class="card" id="vkgroup" style="margin-top:0"></div>
+    <div class="card" style="margin-top:10px">
       <h3>Посетители группы</h3>
       <div class="range" id="rangebox">
         <button class="chip f active" data-r="7">7 дней</button>
@@ -252,7 +253,7 @@ function renderCity(){
   if(c.visitors) chart(spark,c.visitors.slice(-7),WD);
   else spark.innerHTML='<div class="empty">График появится после подключения группы ВК</div>';
   bigRender();
-  renderWeek(c); renderAud(c); renderAds(c); FILTER='all'; renderChips(c,reviews,need); renderReviews(reviews,need);
+  renderWeek(c); renderAud(c); renderVkGroup(c); renderAds(c); FILTER='all'; renderChips(c,reviews,need); renderReviews(reviews,need);
 }
 function renderWeek(c){
   if(!c.week){ $('#weekstats').innerHTML='<div class="empty">Итоги появятся после подключения ключа ВК</div>'; return; }
@@ -265,6 +266,20 @@ function renderWeek(c){
 function renderAud(c){
   if(!c.aud){ $('#aud').innerHTML='<div class="empty">Аудитория появится после подключения ключа ВК</div>'; return; }
   $('#aud').innerHTML=c.aud.map(a=>'<div class="row"><div class="t"><span>'+a[0]+'</span><span>'+a[1]+'%</span></div><div class="bar"><i style="width:'+a[1]+'%"></i></div></div>').join('');
+}
+
+// ================= ВК: СООБЩЕСТВО ГОРОДА =================
+function renderVkGroup(c){
+  const u=(c.sources&&c.sources.vk)||'';
+  const short=u.replace(/^https?:\/\/(www\.)?/,'');
+  $('#vkgroup').innerHTML=
+   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+   '<span class="badge code">ВК</span>'+
+   '<span style="font-size:13px;font-weight:700">'+c.name+'</span>'+
+   '<span style="font-size:11px;color:var(--muted)">'+short+'</span>'+
+   (u?'<a class="reply" style="margin:0 0 0 auto" href="'+u+'" target="_blank" rel="noopener">Открыть сообщество</a>':'')+
+   '</div>'+
+   '<div class="goal" style="margin-top:6px">У каждого города своё сообщество — и статистика будет своя. Для живых цифр нужен ключ API этого сообщества (Управление → Работа с API).</div>';
 }
 
 // ================= РЕКЛАМА =================
