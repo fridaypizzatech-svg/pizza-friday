@@ -200,7 +200,7 @@ function bigRender(){
 
 // ================= РЕНДЕР ГОРОДА =================
 function renderCity(){
-  const c=CITIES[CITY], reviews=c.reviews||[], need=reviews.filter(r=>r.s<=3);
+  const c=CITIES[CITY], reviews=c.reviews||[], need=reviews.filter(r=>r.s!=null&&r.s<=3);
   $('#sub').textContent=[c.name,c.addr,'обновлено '+new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+', '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})].filter(Boolean).join(' · ');
   $('#rateVal').textContent=c.rating[0]; $('#rateSrc').textContent=c.rating[1];
   $('#dot').textContent=need.length; $('#dot').style.display=need.length?'':'none';
@@ -256,12 +256,13 @@ function renderChips(c,reviews,need){
 }
 const stars=s=>'★'.repeat(s)+'<span class="off">'+'★'.repeat(5-s)+'</span>';
 function renderReviews(reviews,need){
-  const list=reviews.filter(r=>FILTER==='all'||(FILTER==='need'?r.s<=3:r.s===+FILTER));
+  const list=reviews.filter(r=>FILTER==='all'||(FILTER==='need'?(r.s!=null&&r.s<=3)||r.hot:r.s!=null&&r.s===+FILTER));
   $('#reviewList').innerHTML=list.length?list.map(r=>
-   '<div class="review '+(r.s<=3?'top':'')+'"><div class="head"><div class="avatar">'+r.n[0]+'</div>'+
-   '<div><div class="who">'+r.n+'<span class="badge '+r.src+'">'+SRC[r.src]+'</span>'+(r.s<=3?'<span class="badge hot">СРОЧНО</span>':'')+'</div>'+
-   '<div class="meta">'+r.date+'</div></div><div class="stars">'+stars(r.s)+'</div></div>'+
+   '<div class="review '+((r.s!=null&&r.s<=3)||r.hot?'top':'')+'"><div class="head"><div class="avatar">'+r.n[0]+'</div>'+
+   '<div><div class="who">'+r.n+'<span class="badge '+r.src+'">'+SRC[r.src]+'</span>'+((r.s!=null&&r.s<=3)||r.hot?'<span class="badge hot">СРОЧНО</span>':'')+'</div>'+
+   '<div class="meta">'+r.date+'</div></div><div class="stars">'+(r.s!=null?stars(r.s):'')+'</div></div>'+
    '<div class="txt">'+r.t+'</div>'+
+   (r.replied?'<div class="meta" style="margin-top:7px">✅ Ответ бизнеса опубликован</div>':'')+
    (r.draft?'<div class="draft"><div class="lbl">Черновик ответа</div><p>'+r.draft+'</p><button class="copy" data-t="'+r.draft.replace(/"/g,'&quot;')+'">Скопировать ответ</button></div>':'')+
    '</div>').join(''):'<div class="empty">'+(reviews.length?'Пока пусто':'Отзывы появятся, когда включу сбор — свежие будут падать и сюда, и в бот')+'</div>';
 }
