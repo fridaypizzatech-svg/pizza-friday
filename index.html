@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Пицца Пятница — дашборд</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg:#0F0E13; --card:#1A1821; --card2:#221F2B; --line:#2C2937;
+    --text:#F3F0EA; --muted:#9B97A6; --accent:#FF8A2A; --accent2:#FFB800;
+    --green:#4CD97B; --red:#FF5C5C; --star:#FFC531;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  .app{max-width:480px;margin:0 auto;padding:16px 14px 28px;min-height:100vh}
+
+  header{display:flex;align-items:center;gap:12px;padding:4px 2px 12px}
+  .logo{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,#FF6B00,#FFB800);box-shadow:0 6px 18px rgba(255,138,42,.35);flex-shrink:0}
+  header h1{font-size:18px;font-weight:700;letter-spacing:.2px}
+  .sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .rating-badge{margin-left:auto;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 11px;flex-shrink:0}
+  .rating-badge b{font-size:16px;color:var(--star)}
+  .rating-badge span{display:block;font-size:10px;color:var(--muted);white-space:nowrap}
+
+  .cities{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .cities .chip{border:1px solid var(--line);background:var(--card);color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;border-radius:20px;padding:7px 13px;cursor:pointer}
+  .cities .chip.active{background:linear-gradient(135deg,#FF6B00,#FF9A2A);border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(255,107,0,.35)}
+
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:14px}
+  .tabs button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;padding:9px 4px;border-radius:10px;cursor:pointer;white-space:nowrap}
+  .tabs button.active{background:linear-gradient(135deg,#FF6B00,#FF9A2A);color:#fff;box-shadow:0 4px 12px rgba(255,107,0,.35)}
+  .tabs button:disabled{opacity:.35;cursor:default}
+  .tabs .dot{display:inline-block;min-width:16px;height:16px;line-height:16px;border-radius:8px;background:var(--red);color:#fff;font-size:10px;padding:0 4px;vertical-align:1px}
+  .tabs button.active .dot{background:#fff;color:#C24A00}
+
+  section.tab{display:none}
+  section.tab.active{display:block}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px}
+  .kpi .lbl{font-size:11px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+  .kpi .val{font-size:22px;font-weight:700;margin-top:5px}
+  .kpi .delta{font-size:12px;margin-top:3px;color:var(--muted)}
+  .delta.up{color:var(--green)} .delta.warn{color:var(--red)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}
+  .card h3{font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .card h3 .more{margin-left:auto;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;background:none;border:0;font-family:inherit}
+  .card p.hint{font-size:12px;color:var(--muted);line-height:1.45}
+
+  .alert-card{background:linear-gradient(135deg,rgba(255,92,92,.12),rgba(255,92,92,.04));border:1px solid rgba(255,92,92,.35)}
+  .alert-card.ok{background:linear-gradient(135deg,rgba(77,217,123,.12),rgba(77,217,123,.04));border:1px solid rgba(77,217,123,.35)}
+  .alert-card .big{font-size:14px;font-weight:600}
+  .alert-card p{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+  .btn{display:inline-block;border:0;font-family:inherit;font-size:13px;font-weight:600;border-radius:11px;padding:9px 14px;cursor:pointer;margin-top:10px}
+  .btn-accent{background:linear-gradient(135deg,#FF6B00,#FF9A2A);color:#fff}
+
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .chip.f{border:1px solid var(--line);background:var(--card);color:var(--muted);font:inherit;font-size:12px;font-weight:600;border-radius:20px;padding:6px 12px;cursor:pointer}
+  .chip.f.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  .review{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-top:10px}
+  .review.top{border-color:rgba(255,92,92,.45)}
+  .review .head{display:flex;align-items:center;gap:8px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--accent);flex-shrink:0}
+  .review .who{font-size:13px;font-weight:600}
+  .review .meta{font-size:11px;color:var(--muted);margin-top:1px}
+  .stars{margin-left:auto;color:var(--star);font-size:13px;letter-spacing:1px;white-space:nowrap}
+  .stars .off{color:#4A4653}
+  .badge{font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px}
+  .badge.ya{background:rgba(255,209,0,.15);color:#FFD100}
+  .badge.gis{background:rgba(77,217,123,.15);color:#4CD97B}
+  .badge.hot{background:rgba(255,92,92,.18);color:var(--red)}
+  .review .txt{font-size:13px;line-height:1.5;margin-top:9px;color:#E6E2DB}
+  .draft{margin-top:10px;background:var(--card2);border:1px dashed #3A3646;border-radius:12px;padding:10px 12px}
+  .draft .lbl{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--accent);text-transform:uppercase}
+  .draft p{font-size:12px;line-height:1.5;color:#CFCCC5;margin-top:5px}
+  .copy{margin-top:8px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-size:12px;font-weight:600;border-radius:9px;padding:7px 12px;cursor:pointer}
+  .copy.ok{background:rgba(77,217,123,.15);border-color:rgba(77,217,123,.4);color:var(--green)}
+  .empty{text-align:center;color:var(--muted);font-size:13px;padding:26px 0}
+
+  .range{display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
+  .range .chip.f{padding:5px 11px}
+  .chart-wrap{background:var(--card2);border-radius:12px;padding:10px 8px 4px}
+  .chart-wrap svg{display:block;width:100%;height:auto}
+
+  .statline{display:flex;justify-content:space-between;font-size:13px;padding:9px 2px;border-bottom:1px solid var(--line)}
+  .statline:last-child{border-bottom:0}
+  .statline b{font-weight:700}
+  .statline .up{color:var(--green)} .statline .down{color:var(--red)}
+
+  .bars .row{margin-top:9px}
+  .bars .row .t{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .bars .bar{height:8px;border-radius:4px;background:var(--card2);overflow:hidden}
+  .bars .bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#FF6B00,#FFB800)}
+
+  footer{margin-top:18px;font-size:11px;color:var(--muted);text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">🍕</div>
+    <div>
+      <h1>Пицца Пятница</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="rating-badge"><b id="rateVal"></b><span id="rateSrc"></span></div>
+  </header>
+
+  <nav class="cities" id="cities"></nav>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="overview" class="active">Обзор</button>
+    <button data-tab="reviews">Отзывы <span class="dot" id="dot" style="display:none"></span></button>
+    <button data-tab="vk">ВК</button>
+    <button disabled>Реклама</button>
+  </nav>
+
+  <section class="tab active" id="tab-overview">
+    <div class="grid" id="kpis"></div>
+    <div id="alertbox"></div>
+    <div class="card">
+      <h3>Посетители группы ВК, неделя <button class="more" data-goto="vk">подробнее →</button></h3>
+      <div class="chart-wrap" id="spark"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-reviews">
+    <div class="chips" id="chips"></div>
+    <div id="reviewList"></div>
+  </section>
+
+  <section class="tab" id="tab-vk">
+    <div class="card" style="margin-top:0">
+      <h3>Посетители группы</h3>
+      <div class="range" id="rangebox">
+        <button class="chip f active" data-r="7">7 дней</button>
+        <button class="chip f" data-r="30">30 дней</button>
+      </div>
+      <div class="chart-wrap" id="bigchart"></div>
+    </div>
+    <div class="card">
+      <h3>Итоги недели</h3>
+      <div id="weekstats"></div>
+    </div>
+    <div class="card bars">
+      <h3>Аудитория</h3>
+      <div id="aud"></div>
+    </div>
+  </section>
+
+  <footer>Рейтинги и адреса — из Яндекс Карт.<br>Остальные данные подтягиваются автоматически<br>по мере подключения источников.</footer>
+</div>
+
+<script>
+// ================= БАЗОВЫЕ ДАННЫЕ (резерв, если data.json недоступен) =================
+const CITIES={
+ryazan:{ name:'Рязань', addr:'Зубкова 21', rating:['5.0★','Яндекс · 926'], reviews:[] },
+tambov:{ name:'Тамбов', addr:'Магистральная, 4А', rating:['4.9★','Яндекс · 1772'], reviews:[] },
+penza:{ name:'Пенза', addr:'Рахманинова, 2', rating:['5.0★','Яндекс · 572'], reviews:[] },
+saransk:{ name:'Саранск', addr:'Васенко, 15', rating:['5.0★','Яндекс · 389'], reviews:[] }
+};
+const ORDER=['ryazan','tambov','penza','saransk'];
+const SRC={ya:'Яндекс',gis:'2ГИС'};
+
+// ================= УТИЛИТЫ =================
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const WD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+let CITY='ryazan', TAB='overview', FILTER='all', RANGE=7;
+
+function plural(n,a,b,c){const m=n%10,h=n%100;return m===1&&h!==11?a:(m>=2&&m<=4&&(h<10||h>=20)?b:c);}
+function kpi(l,v,d){return '<div class="kpi"><div class="lbl">'+l+'</div><div class="val">'+v+'</div>'+d+'</div>';}
+
+// ================= ГРАФИК =================
+function chart(el,data,labels){
+  const W=340,H=130,P=6,max=Math.max(...data)*1.12,min=Math.min(...data)*0.85;
+  const pts=data.map((v,i)=>[P+i*(W-2*P)/(data.length-1),H-14-(v-min)/(max-min)*(H-34)]);
+  const line=pts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ');
+  const area='M'+pts[0][0]+','+(H-14)+' L'+line.replace(/ /g,' L')+' L'+pts[pts.length-1][0]+','+(H-14)+' Z';
+  let xl='';
+  labels.forEach((l,i)=>{const x=pts[Math.round(i*(pts.length-1)/(labels.length-1))][0];
+    xl+='<text x="'+x+'" y="'+(H-2)+'" font-size="8.5" fill="#9B97A6" text-anchor="middle">'+l+'</text>';});
+  const g='g'+el.id;
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'"><defs><linearGradient id="'+g+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="#FF8A2A" stop-opacity=".35"/><stop offset="1" stop-color="#FF8A2A" stop-opacity="0"/></linearGradient></defs>'+
+    '<path d="'+area+'" fill="url(#'+g+')"/>'+
+    '<polyline points="'+line+'" fill="none" stroke="#FF8A2A" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    '<circle cx="'+pts[pts.length-1][0]+'" cy="'+pts[pts.length-1][1]+'" r="3.5" fill="#FFB800"/>'+xl+'</svg>';
+}
+function bigRender(){
+  const c=CITIES[CITY];
+  if(!c.visitors){ $('#bigchart').innerHTML='<div class="empty">Статистика появится после подключения группы ВК</div>'; return; }
+  const d=c.visitors.slice(-RANGE);
+  const labels=RANGE===7?WD:d.map((_,i)=>{const dt=new Date(Date.now()-(RANGE-1-i)*864e5);return dt.getDate()+'.'+(dt.getMonth()+1);}).filter((_,i)=>i%9===0||i===RANGE-1);
+  chart($('#bigchart'),d,labels);
+}
+
+// ================= РЕНДЕР ГОРОДА =================
+function renderCity(){
+  const c=CITIES[CITY], reviews=c.reviews||[], need=reviews.filter(r=>r.s<=3);
+  $('#sub').textContent=[c.name,c.addr,'обновлено '+new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+', '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})].filter(Boolean).join(' · ');
+  $('#rateVal').textContent=c.rating[0]; $('#rateSrc').textContent=c.rating[1];
+  $('#dot').textContent=need.length; $('#dot').style.display=need.length?'':'none';
+
+  const cnt=+(c.rating[1].split('·')[1]||'').trim();
+  const subsKpi=c.week
+    ? kpi('Подписчики ВК',c.subs||'—','<div class="delta up">'+c.week.newSubs+' за неделю</div>')
+    : kpi('Подписчики ВК','—','<div class="delta">ВК-ключ подключается</div>');
+  const reachKpi=c.week
+    ? kpi('Охват ВК',c.week.reachShort||'—','<div class="delta up">'+c.week.reach[1]+' к прошлой</div>')
+    : kpi('Охват ВК','—','<div class="delta">ВК-ключ подключается</div>');
+  $('#kpis').innerHTML=
+   kpi('Отзывы за неделю',reviews.length, need.length?'<div class="delta warn">'+need.length+' требуют ответа</div>':'<div class="delta up">всё спокойно</div>')+
+   kpi('Рейтинг',c.rating[0],'<div class="delta up">'+cnt+' '+plural(cnt,'оценка','оценки','оценок')+'</div>')+
+   subsKpi+reachKpi;
+
+  const box=$('#alertbox');
+  if(need.length){
+    box.innerHTML='<div class="card alert-card"><div class="big">🔴 '+need.length+' '+plural(need.length,'отзыв','отзыва','отзывов')+' '+(need.length===1?'ждёт':'ждут')+' ответа</div><p>'+
+      need.map(r=>r.n+' ('+r.s+'★, '+SRC[r.src]+')').join('<br>')+'</p><button class="btn btn-accent" data-goto="reviews" data-filter="need">Ответить</button></div>';
+  }else{
+    box.innerHTML='<div class="card alert-card ok"><div class="big">✓ '+(reviews.length?'Со всеми отзывами ответили':'Новых отзывов нет')+'</div><p>'+(reviews.length?'Новых за неделю: '+reviews.length+'. Так держать!':'Как только появятся новые — пришлю сюда, в бот.')+'</p></div>';
+  }
+
+  const spark=$('#spark');
+  if(c.visitors) chart(spark,c.visitors.slice(-7),WD);
+  else spark.innerHTML='<div class="empty">График появится после подключения группы ВК</div>';
+  bigRender();
+  renderWeek(c); renderAud(c); FILTER='all'; renderChips(c,reviews,need); renderReviews(reviews,need);
+}
+function renderWeek(c){
+  if(!c.week){ $('#weekstats').innerHTML='<div class="empty">Итоги появятся после подключения ключа ВК</div>'; return; }
+  const row=(l,v,d,cls)=>'<div class="statline"><span>'+l+'</span><b>'+v+' '+(d?'<span class="'+cls+'">'+d+'</span>':'')+'</b></div>';
+  $('#weekstats').innerHTML=
+   row('Посещаемость',c.week.pos[0],c.week.pos[1],'up')+row('Просмотры',c.week.views[0],c.week.views[1],'up')+
+   row('Охват',c.week.reach[0],c.week.reach[1],'up')+row('Новые подписчики','<span class="up">'+c.week.newSubs+'</span>')+
+   row('Отписались',c.week.lost==='0'?'<span class="up">0</span>':'<span class="down">'+c.week.lost+'</span>');
+}
+function renderAud(c){
+  if(!c.aud){ $('#aud').innerHTML='<div class="empty">Аудитория появится после подключения ключа ВК</div>'; return; }
+  $('#aud').innerHTML=c.aud.map(a=>'<div class="row"><div class="t"><span>'+a[0]+'</span><span>'+a[1]+'%</span></div><div class="bar"><i style="width:'+a[1]+'%"></i></div></div>').join('');
+}
+
+// ================= ОТЗЫВЫ =================
+function renderChips(c,reviews,need){
+  if(!reviews.length){ $('#chips').innerHTML=''; return; }
+  const f5=reviews.filter(r=>r.s===5).length, f4=reviews.filter(r=>r.s===4).length;
+  let h='<button class="chip f active" data-f="all">Все · '+reviews.length+'</button>';
+  if(f5)h+='<button class="chip f" data-f="5">5★</button>';
+  if(f4)h+='<button class="chip f" data-f="4">4★</button>';
+  if(need.length)h+='<button class="chip f" data-f="need">Есть проблемы · '+need.length+'</button>';
+  $('#chips').innerHTML=h;
+}
+const stars=s=>'★'.repeat(s)+'<span class="off">'+'★'.repeat(5-s)+'</span>';
+function renderReviews(reviews,need){
+  const list=reviews.filter(r=>FILTER==='all'||(FILTER==='need'?r.s<=3:r.s===+FILTER));
+  $('#reviewList').innerHTML=list.length?list.map(r=>
+   '<div class="review '+(r.s<=3?'top':'')+'"><div class="head"><div class="avatar">'+r.n[0]+'</div>'+
+   '<div><div class="who">'+r.n+'<span class="badge '+r.src+'">'+SRC[r.src]+'</span>'+(r.s<=3?'<span class="badge hot">СРОЧНО</span>':'')+'</div>'+
+   '<div class="meta">'+r.date+'</div></div><div class="stars">'+stars(r.s)+'</div></div>'+
+   '<div class="txt">'+r.t+'</div>'+
+   (r.draft?'<div class="draft"><div class="lbl">Черновик ответа</div><p>'+r.draft+'</p><button class="copy" data-t="'+r.draft.replace(/"/g,'&quot;')+'">Скопировать ответ</button></div>':'')+
+   '</div>').join(''):'<div class="empty">'+(reviews.length?'Пока пусто':'Отзывы появятся, когда включу сбор — свежие будут падать и сюда, и в бот')+'</div>';
+}
+
+// ================= ГОРОДА / ВКЛАДКИ =================
+function renderCities(){
+  $('#cities').innerHTML=ORDER.map(k=>'<button class="chip'+(k===CITY?' active':'')+'" data-c="'+k+'">'+CITIES[k].name+'</button>').join('');
+}
+function showTab(name){TAB=name;
+  $$('#tabs button[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  $$('.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+name));
+  $('#dot').className='dot'+(name==='reviews'?' w':'');
+  history.replaceState(null,'','#'+name+'@'+CITY);
+}
+$$('#tabs button[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-goto]');
+  if(t){showTab(t.dataset.goto); if(t.dataset.filter){FILTER=t.dataset.filter;const c=CITIES[CITY],rv=c.reviews||[];
+    $$('#chips .chip').forEach(x=>x.classList.toggle('active',x.dataset.f===FILTER));renderReviews(rv,rv.filter(r=>r.s<=3));}return;}
+  const cc=e.target.closest('.cities .chip');
+  if(cc){CITY=cc.dataset.c;renderCities();renderCity();return;}
+  const fc=e.target.closest('#chips .chip');
+  if(fc){FILTER=fc.dataset.f;$$('#chips .chip').forEach(x=>x.classList.toggle('active',x===fc));const c=CITIES[CITY],rv=c.reviews||[];renderReviews(rv,rv.filter(r=>r.s<=3));return;}
+  const rc=e.target.closest('.range .chip');
+  if(rc){RANGE=+rc.dataset.r;$$('.range .chip').forEach(x=>x.classList.toggle('active',x===rc));bigRender();return;}
+  const cp=e.target.closest('.copy');
+  if(cp){const done=()=>{cp.textContent='Скопировано ✓';cp.classList.add('ok');setTimeout(()=>{cp.textContent='Скопировать ответ';cp.classList.remove('ok')},1800);};
+    const fb=()=>{const ta=document.createElement('textarea');ta.value=cp.dataset.t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(err){}ta.remove();};
+    if(navigator.clipboard)navigator.clipboard.writeText(cp.dataset.t).then(done).catch(fb);else fb();}
+});
+
+// ================= СТАРТ =================
+function boot(){
+  const h=location.hash.slice(1).split('@');
+  if(h[1]&&CITIES[h[1]])CITY=h[1];
+  if(h[0]&&$('#tab-'+h[0])){TAB=h[0];$$('#tabs button[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===TAB));$$('.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+TAB));}
+  renderCities();
+  renderCity();
+}
+try{ Telegram.WebApp.ready(); Telegram.WebApp.expand(); }catch(e){}
+fetch('data.json?t='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{
+  if(d&&d.cities){ for(const k of ORDER){ if(d.cities[k]) CITIES[k]=d.cities[k]; } }
+  boot();
+}).catch(()=>boot());
+</script>
+</body>
+</html>
