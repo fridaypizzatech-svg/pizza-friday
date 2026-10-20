@@ -78,6 +78,7 @@
   .draft p{font-size:12px;line-height:1.5;color:#CFCCC5;margin-top:5px}
   .copy{margin-top:8px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-size:12px;font-weight:600;border-radius:9px;padding:7px 12px;cursor:pointer}
   .copy.ok{background:rgba(77,217,123,.15);border-color:rgba(77,217,123,.4);color:var(--green)}
+  .reply{display:inline-block;margin-top:8px;margin-right:8px;border:1px solid var(--accent);background:rgba(255,138,42,.12);color:var(--accent);font:inherit;font-size:12px;font-weight:700;border-radius:9px;padding:7px 12px;text-decoration:none}
   .empty{text-align:center;color:var(--muted);font-size:13px;padding:26px 0}
 
   .range{display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
@@ -263,6 +264,7 @@ function renderReviews(reviews,need){
    '<div class="meta">'+r.date+'</div></div><div class="stars">'+(r.s!=null?stars(r.s):'')+'</div></div>'+
    '<div class="txt">'+r.t+'</div>'+
    (r.replied?'<div class="meta" style="margin-top:7px">✅ Ответ бизнеса опубликован</div>':'')+
+   (r.url&&!(r.replied&&r.src==='ya')?'<a class="reply" href="'+r.url+'" target="_blank" rel="noopener">✍️ Ответить на площадке</a>':'')+
    (r.draft?'<div class="draft"><div class="lbl">Черновик ответа</div><p>'+r.draft+'</p><button class="copy" data-t="'+r.draft.replace(/"/g,'&quot;')+'">Скопировать ответ</button></div>':'')+
    '</div>').join(''):'<div class="empty">'+(reviews.length?'Пока пусто':'Отзывы появятся, когда включу сбор — свежие будут падать и сюда, и в бот')+'</div>';
 }
